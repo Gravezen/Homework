@@ -26,7 +26,8 @@ def pets_list():
         print("Список питомцев пуст!")
         return False
     else:
-        print(pets)
+        for id, name in pets.items():
+            print(id, name)
 
 def read(n):
     if  get_pet(n) == False:
