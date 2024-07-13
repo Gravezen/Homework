@@ -7,6 +7,9 @@ from utils import randcell2
 # 2 - река
 # 3 - госпиталь
 # 4 - апгрейд шоп
+# 5 - огонь
+
+CELL_TYPES = ['🟩', '🌲', '🌊', '🏥', '⛪', '🔥']
 
 class Map:
     
@@ -23,6 +26,12 @@ class Map:
                     rx, ry = rx2, ry2 # заменяем начальные координаты на координаты следующей клетки
                     l -= 1 # уменьшаем длину реки
 
+    def genetate_tree(self): # функция генерации деревьев
+        c = randcell(self.w, self.h) # выбираем функцию случайной клеточки
+        cx, cy = c[0], c[1]
+        if (self.check_bounds(cx, cy) and self.cells[cx][cy] == 0): # если клетка проходит проверку и на её месте 0 (поле)
+            self.cells[cx][cy] = 1 # сажаем туда дерево :)
+
     def generate_forest(self, r, mxr): # r - диапазон рандома, mxr - отсечка(если показатель рандома выше определенного значения, отсекаем)
         for ri in range(self.h): # проходимся по полю (map)
             for ci in range(self.w):
@@ -34,19 +43,26 @@ class Map:
         for row in self.cells: # вводим поля
             print('⬛', end="") # вводим рамку
             for cell in row: # 2 цикла, так как список в списке
-                if cell == 0:
-                    print('🟩', end="") # в конце ставим ничего, чтоб не перекидывало на другую строку
-                elif cell == 1:
-                    print('🌲', end="")
-                elif cell == 2:
-                    print('🌊', end="")
-                elif cell == 3:
-                    print('🏥', end="")
-                elif cell == 4:
-                    print('⛪', end="")
+                if (cell >= 0 and cell < len(CELL_TYPES)):
+                    print(CELL_TYPES[cell], end="")           
             print('⬛') # вводим рамку
         print('⬛' * (self.w + 2))
 
+    def add_fire(self): # добавляем огонь!
+        c = randcell(self.w, self.h) # выбираем функцию случайной клеточки
+        cx, cy = c[0], c[1]
+        if (self.check_bounds(cx, cy) and self.cells[cx][cy] == 1): # если клетка проходит проверку и на её месте 1 (дерево)
+            self.cells[cx][cy] = 5 # помещаем туда огонь! ааа
+
+    def update_fire(self): # обновляем огонь!
+        for ri in range(self.h):
+            for ci in range(self.w):
+                cell = self.cells[ri][ci]
+                if cell == 5:
+                    self.cells[ri][ci] = 0
+        for i in range(5):
+            self.add_fire()
+            
     def check_bounds(self, x, y):
         if (x < 0 or y < 0 or x >= self.h or y >= self.w):
             return False
@@ -56,9 +72,3 @@ class Map:
         self.w = w
         self.h = h
         self.cells = [[0 for i in range(w)] for j in range(h)]
-
-
-tmp = Map(10, 20)
-tmp.generate_forest(7, 10) # генерирует лес примерно 80%
-tmp.generate_river(5) # генерируем реку длиной 5
-tmp.print_map()
