@@ -1,6 +1,7 @@
 from utils import randbool # импортируем функцию из файла
 from utils import randcell # импортируем ещё функцию из файла
 from utils import randcell2
+import os
 
 # 0 - поле
 # 1 - дерево
@@ -10,8 +11,9 @@ from utils import randcell2
 # 5 - огонь
 
 CELL_TYPES = '🟩🌲🌊🏥⛪🔥'
-TREE_BONUS = 100
-UPGRADE_PRICE = 500
+TREE_BONUS = 150
+UPGRADE_PRICE = 5000
+LIFE_COST = 1000
 
 class Map:
     
@@ -23,19 +25,25 @@ class Map:
         self.generate_river(10) # генерируем реку длиной 10
         self.generate_river(10) # генерируем реку длиной 10
         self.generate_upgrade_shop() # генерируем магазин
+        self.generate_hospital() # генерируем госпиталь
+        
         
     def check_bounds(self, x, y):
         if (x < 0 or y < 0 or x >= self.h or y >= self.w):
             return False
         return True
 
-    def print_map(self, copter):
+    def print_map(self, copter, clouds): # на генерацию карты добавляем вертолёт, облака
         print('⬛' * (self.w + 2)) # вводим рамку
         for ri in range(self.h): # вводим поля
             print('⬛', end="") # вводим рамку
             for ci in range(self.w): # 2 цикла, так как список в списке
                 cell = self.cells[ri][ci]
-                if (copter.x == ri and copter.y == ci): # в конкретный момент времени, вертолёт будет замещать клетку
+                if (clouds.cells[ri][ci] == 1):
+                    print('☁️ ',end="")
+                elif (clouds.cells[ri][ci] == 2):
+                    print('⚡',end="")
+                elif (copter.x == ri and copter.y == ci): # в конкретный момент времени, вертолёт будет замещать клетку
                     print('🚁',end="")
                 elif (cell >= 0 and cell < len(CELL_TYPES)):
                     print(CELL_TYPES[cell], end="")           
@@ -72,6 +80,14 @@ class Map:
         cx, cy = c[0], c[1]
         self.cells[cx][cy] = 4 # ставим туда магазин :)
 
+    def generate_hospital(self):
+        c = randcell(self.w, self.h) # выбираем функцию случайной клеточки
+        cx, cy = c[0], c[1]
+        if self.cells[cx][cy] != 4:
+            self.cells[cx][cy] = 3 # ставим туда магазин :)
+        else:
+            self.generate_hospital
+
     def add_fire(self): # добавляем огонь!
         c = randcell(self.w, self.h) # выбираем функцию случайной клеточки
         cx, cy = c[0], c[1]
@@ -87,8 +103,9 @@ class Map:
         for i in range(10):
             self.add_fire()
 
-    def process_copter(self, copter):
+    def process_copter(self, copter, clouds):
         c = self.cells[copter.x][copter.y] 
+        d = clouds.cells[copter.x][copter.y]
         if (c == 2):
             copter.tank = copter.maxtank
         if (c == 5 and copter.tank > 0):
@@ -98,5 +115,15 @@ class Map:
         if (c == 4 and copter.score >= UPGRADE_PRICE):
             copter.maxtank += 1
             copter.score -= UPGRADE_PRICE
-        
+        if (c == 3 and copter.score >= LIFE_COST):
+            copter.lives += 1
+            copter.score -= LIFE_COST
+        if (d == 2):
+            copter.lives -= 1
+            if (copter.lives == 0):
+                os.system("CLS")
+                print("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥")
+                print("GAME OVER, YOUR SCORE IS", copter.score)
+                print("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥")
+                exit(0)
             

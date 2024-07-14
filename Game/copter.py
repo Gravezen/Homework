@@ -12,6 +12,7 @@ class Copter:
         self.tank = 0
         self.maxtank = 1
         self.score = 0
+        self.lives = 2
 
     def move(self, dx, dy): # функция перемещения вертолёта
         nx = dx + self.x
@@ -21,5 +22,5 @@ class Copter:
     
     def print_stats(self): # выводим меню
         print("🧺 ", self.tank, "/", self.maxtank, sep="", end=" | ")
-        print("🥇", self.score) 
-        
+        print("🥇", self.score, end=" | ") 
+        print("💕", self.lives) 
