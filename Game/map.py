@@ -9,10 +9,39 @@ from utils import randcell2
 # 4 - апгрейд шоп
 # 5 - огонь
 
-CELL_TYPES = ['🟩', '🌲', '🌊', '🏥', '⛪', '🔥']
+CELL_TYPES = '🟩🌲🌊🏥⛪🔥'
+TREE_BONUS = 100
+UPGRADE_PRICE = 500
 
 class Map:
     
+    def __init__(self, w, h):
+        self.w = w
+        self.h = h
+        self.cells = [[0 for i in range(w)] for j in range(h)]
+        self.generate_forest(5, 10) # генерирует лес примерно 50%
+        self.generate_river(10) # генерируем реку длиной 10
+        self.generate_river(10) # генерируем реку длиной 10
+        self.generate_upgrade_shop() # генерируем магазин
+        
+    def check_bounds(self, x, y):
+        if (x < 0 or y < 0 or x >= self.h or y >= self.w):
+            return False
+        return True
+
+    def print_map(self, copter):
+        print('⬛' * (self.w + 2)) # вводим рамку
+        for ri in range(self.h): # вводим поля
+            print('⬛', end="") # вводим рамку
+            for ci in range(self.w): # 2 цикла, так как список в списке
+                cell = self.cells[ri][ci]
+                if (copter.x == ri and copter.y == ci): # в конкретный момент времени, вертолёт будет замещать клетку
+                    print('🚁',end="")
+                elif (cell >= 0 and cell < len(CELL_TYPES)):
+                    print(CELL_TYPES[cell], end="")           
+            print('⬛') # вводим рамку
+        print('⬛' * (self.w + 2))
+
     def generate_river(self, l): # функция создания реки, где l - длина реки
         rc = randcell(self.w, self.h) # задаётся список, выраженный координатами устья реки
         rx, ry = rc[0], rc[1] # переприсваем значения rc, чтоб было проще
@@ -38,15 +67,10 @@ class Map:
                 if randbool(r, mxr):
                     self.cells[ri][ci] = 1
 
-    def print_map(self):
-        print('⬛' * (self.w + 2)) # вводим рамку
-        for row in self.cells: # вводим поля
-            print('⬛', end="") # вводим рамку
-            for cell in row: # 2 цикла, так как список в списке
-                if (cell >= 0 and cell < len(CELL_TYPES)):
-                    print(CELL_TYPES[cell], end="")           
-            print('⬛') # вводим рамку
-        print('⬛' * (self.w + 2))
+    def generate_upgrade_shop(self):
+        c = randcell(self.w, self.h) # выбираем функцию случайной клеточки
+        cx, cy = c[0], c[1]
+        self.cells[cx][cy] = 4 # ставим туда магазин :)
 
     def add_fire(self): # добавляем огонь!
         c = randcell(self.w, self.h) # выбираем функцию случайной клеточки
@@ -60,15 +84,19 @@ class Map:
                 cell = self.cells[ri][ci]
                 if cell == 5:
                     self.cells[ri][ci] = 0
-        for i in range(5):
+        for i in range(10):
             self.add_fire()
-            
-    def check_bounds(self, x, y):
-        if (x < 0 or y < 0 or x >= self.h or y >= self.w):
-            return False
-        return True
 
-    def __init__(self, w, h):
-        self.w = w
-        self.h = h
-        self.cells = [[0 for i in range(w)] for j in range(h)]
+    def process_copter(self, copter):
+        c = self.cells[copter.x][copter.y] 
+        if (c == 2):
+            copter.tank = copter.maxtank
+        if (c == 5 and copter.tank > 0):
+            copter.tank -= 1
+            copter.score += TREE_BONUS
+            self.cells[copter.x][copter.y] = 1
+        if (c == 4 and copter.score >= UPGRADE_PRICE):
+            copter.maxtank += 1
+            copter.score -= UPGRADE_PRICE
+        
+            
