@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ProfilingTarget xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ProjectTarget>
+    <TargetProject>38c9c3f9-1693-4819-8e56-b95cf0c041d8</TargetProject>
+    <FriendlyName>Game</FriendlyName>
+  </ProjectTarget>
+  <Reports>
+    <Report>
+      <Filename>C:\Users\root\AppData\Local\Temp\Game_20240715.vsp</Filename>
+    </Report>
+    <Report>
+      <Filename>C:\Users\root\AppData\Local\Temp\Game_20240715(1).vsp</Filename>
+    </Report>
+  </Reports>
+  <UseVTune>false</UseVTune>
+</ProfilingTarget>
